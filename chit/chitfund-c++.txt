@@ -1,0 +1,110 @@
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+class Node {
+public:
+    string name;
+    int contribution;
+    Node* next;
+
+    Node(string name, int contribution) {
+        this->name = name;
+        this->contribution = contribution;
+        this->next = nullptr;
+    }
+};
+
+class ChitFund {
+private:
+    Node* head;
+    int totalContribution;
+    int numParticipants;
+
+public:
+    ChitFund() {
+        head = nullptr;
+        totalContribution = 0;
+        numParticipants = 0;
+    }
+
+    void addParticipant(string name, int contribution) {
+        Node* newNode = new Node(name, contribution);
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next != nullptr) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+        totalContribution += contribution;
+        numParticipants++;
+    }
+
+    void displayParticipants() {
+        Node* temp = head;
+        while (temp != nullptr) {
+            cout << "Name: " << temp->name << ", Contribution: " << temp->contribution << endl;
+            temp = temp->next;
+        }
+    }
+
+    void auction() {
+        int selectedAmount;
+        cout << "Enter the amount to be selected from the total fund: ";
+        cin >> selectedAmount;
+        if (selectedAmount > totalContribution) {
+            cout << "Amount exceeds the total fund! Please enter a valid amount." << endl;
+            return;
+        }
+        totalContribution -= selectedAmount;
+        cout << "Selected amount of " << selectedAmount << " has been taken." << endl;
+        cout << "Remaining fund: " << totalContribution << endl;
+    }
+
+    void luckyDraw() {
+        Node* temp = head;
+        int randomIndex = rand() % numParticipants;
+        for (int i = 0; i < randomIndex; i++) {
+            temp = temp->next;
+        }
+        cout << "The winner of the lucky draw is: " << temp->name << endl;
+    }
+
+    void distributeFunds() {
+        if (totalContribution > 0) {
+            int amountPerParticipant = totalContribution / numParticipants;
+            Node* temp = head;
+            while (temp != nullptr) {
+                cout << temp->name << " gets: " << amountPerParticipant << endl;
+                temp = temp->next;
+            }
+        } else {
+            cout << "No funds left to distribute." << endl;
+        }
+    }
+};
+
+int main() {
+    srand(time(0));
+    ChitFund fund;
+    int numParticipants;
+    cout << "Enter the number of participants in the chit fund: ";
+    cin >> numParticipants;
+    for (int i = 0; i < numParticipants; i++) {
+        string name;
+        int contribution;
+        cout << "Enter name of participant " << (i + 1) << ": ";
+        cin >> name;
+        cout << "Enter contribution of " << name << ": ";
+        cin >> contribution;
+        fund.addParticipant(name, contribution);
+    }
+    fund.displayParticipants();
+    fund.auction();
+    fund.luckyDraw();
+    fund.distributeFunds();
+    return 0;
+}
