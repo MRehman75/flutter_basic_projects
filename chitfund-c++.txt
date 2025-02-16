@@ -1,0 +1,99 @@
+#include <iostream>
+using namespace std;
+
+class ChitFund {
+private:
+    char participantNames[10][50];  // Array to store participant names (max 10 participants and 50 char names)
+    int contributions[10];           // Array to store contributions of participants
+    int numParticipants;
+    int totalContribution;
+
+public:
+    // Constructor to initialize the chit fund system
+    ChitFund(int numParticipants) {
+        this->numParticipants = numParticipants;
+        totalContribution = 0;
+    }
+
+    // Method to input participant details
+    void inputParticipants() {
+        for (int i = 0; i < numParticipants; ++i) {
+            cout << "\nEnter name of participant " << (i + 1) << ": ";
+            cin >> participantNames[i];  // Input name
+            cout << "Enter contribution of " << participantNames[i] << ": ";
+            cin >> contributions[i];  // Input contribution
+            totalContribution += contributions[i];  // Update total contribution
+        }
+    }
+
+    // Method to display participants and their contributions
+    void displayParticipants() {
+        cout << "\nParticipants and their contributions:\n";
+        for (int i = 0; i < numParticipants; ++i) {
+            cout << participantNames[i] << ": " << contributions[i] << endl;
+        }
+    }
+
+    // Method to perform auction and selection
+    void auction() {
+        int selectedAmount;
+        cout << "\nEnter the amount to be selected from the total fund: ";
+        cin >> selectedAmount;
+
+        // Check if selected amount is within the available funds
+        if (selectedAmount > totalContribution) {
+            cout << "Amount exceeds the total fund! Please enter a valid amount." << endl;
+            return;
+        }
+
+        totalContribution -= selectedAmount;
+        cout << "\nSelected amount of " << selectedAmount << " has been taken." << endl;
+        cout << "Remaining fund: " << totalContribution << endl;
+    }
+
+    // Method to distribute remaining funds equally among participants
+    void distributeFunds() {
+        if (totalContribution > 0) {
+            int amountPerParticipant = totalContribution / numParticipants;
+            cout << "\nDistributing remaining funds of " << totalContribution << "...\n";
+            for (int i = 0; i < numParticipants; ++i) {
+                cout << participantNames[i] << " gets: " << amountPerParticipant << endl;
+            }
+        } else {
+            cout << "\nNo funds left to distribute." << endl;
+        }
+    }
+
+    // Method to display the total contribution
+    void displayTotalFund() {
+        cout << "\nTotal Contribution: " << totalContribution << endl;
+    }
+};
+
+int main() {
+    int numParticipants;
+
+    // Get number of participants from the user
+    cout << "Enter the number of participants in the chit fund: ";
+    cin >> numParticipants;
+
+    // Create ChitFund object
+    ChitFund fund(numParticipants);
+
+    // Input participant details
+    fund.inputParticipants();
+
+    // Display participants and their contributions
+    fund.displayParticipants();
+
+    // Display total contribution
+    fund.displayTotalFund();
+
+    // Conduct auction and selection
+    fund.auction();
+
+    // Distribute remaining funds
+    fund.distributeFunds();
+
+    return 0;
+}
