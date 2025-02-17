@@ -45,3 +45,5 @@ void main() {
   // Displaying the result
   print('The result of $num1 $operation $num2 is: $result');
 }
+// explantion of chatgpt about the code
+https://chatgpt.com/c/67c524bd-4a6c-8006-8cbb-9c23a6b0ac4e
