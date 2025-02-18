@@ -1,99 +1,110 @@
 #include <iostream>
+#include <ctime>
 using namespace std;
+
+class Node {
+public:
+    string name;
+    int contribution;
+    Node* next;
+
+    Node(string name, int contribution) {
+        this->name = name;
+        this->contribution = contribution;
+        this->next = nullptr;
+    }
+};
 
 class ChitFund {
 private:
-    char participantNames[10][50];  // Array to store participant names (max 10 participants and 50 char names)
-    int contributions[10];           // Array to store contributions of participants
-    int numParticipants;
+    Node* head;
     int totalContribution;
+    int numParticipants;
 
 public:
-    // Constructor to initialize the chit fund system
-    ChitFund(int numParticipants) {
-        this->numParticipants = numParticipants;
+    ChitFund() {
+        head = nullptr;
         totalContribution = 0;
+        numParticipants = 0;
     }
 
-    // Method to input participant details
-    void inputParticipants() {
-        for (int i = 0; i < numParticipants; ++i) {
-            cout << "\nEnter name of participant " << (i + 1) << ": ";
-            cin >> participantNames[i];  // Input name
-            cout << "Enter contribution of " << participantNames[i] << ": ";
-            cin >> contributions[i];  // Input contribution
-            totalContribution += contributions[i];  // Update total contribution
+    void addParticipant(string name, int contribution) {
+        Node* newNode = new Node(name, contribution);
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next != nullptr) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
         }
+        totalContribution += contribution;
+        numParticipants++;
     }
 
-    // Method to display participants and their contributions
     void displayParticipants() {
-        cout << "\nParticipants and their contributions:\n";
-        for (int i = 0; i < numParticipants; ++i) {
-            cout << participantNames[i] << ": " << contributions[i] << endl;
+        Node* temp = head;
+        while (temp != nullptr) {
+            cout << "Name: " << temp->name << ", Contribution: " << temp->contribution << endl;
+            temp = temp->next;
         }
     }
 
-    // Method to perform auction and selection
     void auction() {
         int selectedAmount;
-        cout << "\nEnter the amount to be selected from the total fund: ";
+        cout << "Enter the amount to be selected from the total fund: ";
         cin >> selectedAmount;
-
-        // Check if selected amount is within the available funds
         if (selectedAmount > totalContribution) {
             cout << "Amount exceeds the total fund! Please enter a valid amount." << endl;
             return;
         }
-
         totalContribution -= selectedAmount;
-        cout << "\nSelected amount of " << selectedAmount << " has been taken." << endl;
+        cout << "Selected amount of " << selectedAmount << " has been taken." << endl;
         cout << "Remaining fund: " << totalContribution << endl;
     }
 
-    // Method to distribute remaining funds equally among participants
+    void luckyDraw() {
+        Node* temp = head;
+        int randomIndex = rand() % numParticipants;
+        for (int i = 0; i < randomIndex; i++) {
+            temp = temp->next;
+        }
+        cout << "The winner of the lucky draw is: " << temp->name << endl;
+    }
+
     void distributeFunds() {
         if (totalContribution > 0) {
             int amountPerParticipant = totalContribution / numParticipants;
-            cout << "\nDistributing remaining funds of " << totalContribution << "...\n";
-            for (int i = 0; i < numParticipants; ++i) {
-                cout << participantNames[i] << " gets: " << amountPerParticipant << endl;
+            Node* temp = head;
+            while (temp != nullptr) {
+                cout << temp->name << " gets: " << amountPerParticipant << endl;
+                temp = temp->next;
             }
         } else {
-            cout << "\nNo funds left to distribute." << endl;
+            cout << "No funds left to distribute." << endl;
         }
-    }
-
-    // Method to display the total contribution
-    void displayTotalFund() {
-        cout << "\nTotal Contribution: " << totalContribution << endl;
     }
 };
 
 int main() {
+    srand(time(0));
+    ChitFund fund;
     int numParticipants;
-
-    // Get number of participants from the user
     cout << "Enter the number of participants in the chit fund: ";
     cin >> numParticipants;
-
-    // Create ChitFund object
-    ChitFund fund(numParticipants);
-
-    // Input participant details
-    fund.inputParticipants();
-
-    // Display participants and their contributions
+    for (int i = 0; i < numParticipants; i++) {
+        string name;
+        int contribution;
+        cout << "Enter name of participant " << (i + 1) << ": ";
+        cin >> name;
+        cout << "Enter contribution of " << name << ": ";
+        cin >> contribution;
+        fund.addParticipant(name, contribution);
+    }
     fund.displayParticipants();
-
-    // Display total contribution
-    fund.displayTotalFund();
-
-    // Conduct auction and selection
     fund.auction();
-
-    // Distribute remaining funds
+    fund.luckyDraw();
     fund.distributeFunds();
-
     return 0;
 }
