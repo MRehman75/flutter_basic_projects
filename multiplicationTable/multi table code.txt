@@ -1,0 +1,361 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(MathTrainerApp());
+
+class MathTrainerApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Math Trainer',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: HomeScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+// Home Screen
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Math Trainer')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            MenuButton(title: 'Learn Table', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => LearnTableScreen()));
+            }),
+            SizedBox(height: 20),
+            MenuButton(title: 'Training', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TrainingScreen()));
+            }),
+            SizedBox(height: 20),
+            MenuButton(title: 'Start Test', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TestScreen()));
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MenuButton extends StatelessWidget {
+  final String title;
+  final VoidCallback onTap;
+  MenuButton({required this.title, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 60)),
+      child: Text(title, style: TextStyle(fontSize: 20)),
+    );
+  }
+}
+
+// Learn Table Screen
+class LearnTableScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Learn Tables')),
+      body: ListView.builder(
+        itemCount: 30,
+        itemBuilder: (context, index) {
+          int table = index + 1;
+          return Card(
+            margin: EdgeInsets.all(8),
+            child: ListTile(
+              title: Text('Table of $table'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => TableDetailScreen(number: table)),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Table Detail Screen
+class TableDetailScreen extends StatelessWidget {
+  final int number;
+  TableDetailScreen({required this.number});
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> tableList = List.generate(
+      10,
+      (i) => '$number × ${i + 1} = ${number * (i + 1)}',
+    );
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Table of $number')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Multiplication Table:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+            ...tableList.map((line) => Text(line, style: TextStyle(fontSize: 18))),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => QuizScreen(type: 'multiplication', number: number)),
+                    );
+                  },
+                  child: Text('Start Multiplication'),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => QuizScreen(type: 'division', number: number)),
+                    );
+                  },
+                  child: Text('Start Division'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Training Screen
+class TrainingScreen extends StatefulWidget {
+  @override
+  _TrainingScreenState createState() => _TrainingScreenState();
+}
+
+class _TrainingScreenState extends State<TrainingScreen> {
+  final nameController = TextEditingController();
+  String operation = '+';
+  int difficulty = 1;
+  String gameType = 'Test';
+
+  final operations = ['+', '-', '*', '/'];
+  final gameTypes = ['Test', 'True/False', 'Input'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Training')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Enter Name'),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              value: operation,
+              onChanged: (val) => setState(() => operation = val!),
+              items: operations.map((op) {
+                return DropdownMenuItem(value: op, child: Text(op));
+              }).toList(),
+            ),
+            SizedBox(height: 10),
+            Text('Difficulty (1 to 10)'),
+            Slider(
+              value: difficulty.toDouble(),
+              min: 1,
+              max: 10,
+              divisions: 9,
+              label: '$difficulty',
+              onChanged: (val) => setState(() => difficulty = val.toInt()),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              value: gameType,
+              onChanged: (val) => setState(() => gameType = val!),
+              items: gameTypes.map((type) {
+                return DropdownMenuItem(value: type, child: Text(type));
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Training started for $operation at level $difficulty')),
+                );
+              },
+              child: Text('Start Training'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Start Test Screen
+class TestScreen extends StatefulWidget {
+  @override
+  _TestScreenState createState() => _TestScreenState();
+}
+
+class _TestScreenState extends State<TestScreen> {
+  final nameController = TextEditingController();
+  String difficulty = 'Easy';
+
+  final difficulties = ['Easy', 'Middle', 'Hard'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Start Test')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Enter Name'),
+            ),
+            SizedBox(height: 20),
+            DropdownButton<String>(
+              value: difficulty,
+              onChanged: (val) => setState(() => difficulty = val!),
+              items: difficulties.map((level) {
+                return DropdownMenuItem(value: level, child: Text(level));
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Test started at $difficulty difficulty')),
+                );
+              },
+              child: Text('Start Test'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Quiz Screen
+class QuizScreen extends StatefulWidget {
+  final String type;
+  final int number;
+
+  QuizScreen({required this.type, required this.number});
+
+  @override
+  _QuizScreenState createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> {
+  int questionIndex = 0;
+  int score = 0;
+  final answerController = TextEditingController();
+  List<Map<String, dynamic>> questions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    generateQuestions();
+  }
+
+  void generateQuestions() {
+    for (int i = 1; i <= 10; i++) {
+      int answer = widget.type == 'multiplication'
+          ? widget.number * i
+          : (widget.number * i); // for division setup
+      int dividend = widget.type == 'division' ? answer : widget.number;
+      int divisor = widget.type == 'division' ? widget.number : i;
+
+      questions.add({
+        'question': widget.type == 'multiplication'
+            ? '${widget.number} × $i'
+            : '$dividend ÷ $divisor',
+        'answer': widget.type == 'multiplication'
+            ? widget.number * i
+            : (dividend ~/ divisor),
+      });
+    }
+  }
+
+  void checkAnswer() {
+    int userAnswer = int.tryParse(answerController.text) ?? -1;
+    if (userAnswer == questions[questionIndex]['answer']) {
+      score++;
+    }
+
+    setState(() {
+      questionIndex++;
+      answerController.clear();
+    });
+
+    if (questionIndex >= 10) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Quiz Completed!'),
+          content: Text('Your Score: $score / 10'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            )
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (questionIndex >= 10) return Scaffold(body: SizedBox());
+
+    return Scaffold(
+      appBar: AppBar(title: Text('${widget.type == 'multiplication' ? 'Multiplication' : 'Division'} Quiz')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(children: [
+          Text('Question ${questionIndex + 1}:', style: TextStyle(fontSize: 20)),
+          SizedBox(height: 10),
+          Text(
+            questions[questionIndex]['question'],
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
+          TextField(
+            controller: answerController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'Your Answer'),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: checkAnswer,
+            child: Text('Submit'),
+          ),
+        ]),
+      ),
+    );
+  }
+}
