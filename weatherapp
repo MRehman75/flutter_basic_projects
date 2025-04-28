@@ -1,0 +1,125 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const WeatherApp());
+}
+
+class WeatherApp extends StatelessWidget {
+  const WeatherApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Weather Finder',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const WeatherScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class WeatherScreen extends StatefulWidget {
+  const WeatherScreen({super.key});
+
+  @override
+  State<WeatherScreen> createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends State<WeatherScreen> {
+  final TextEditingController cityController = TextEditingController();
+
+  String temperature = '';
+  String description = '';
+  bool isLoading = false;
+
+  final String apiKey = 'b3c6f1102c2a2cd08562298da0e9d49b'; // Your API Key
+
+  Future<void> fetchWeatherData(String cityName) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final url = Uri.parse(
+        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$apiKey&units=metric');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          temperature = '${data['main']['temp']} °C';
+          description = data['weather'][0]['description'];
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load weather');
+      }
+    } catch (e) {
+      setState(() {
+        temperature = 'Error';
+        description = 'City not found or API error';
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    cityController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Weather Finder'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: cityController,
+              decoration: const InputDecoration(
+                labelText: 'Enter City Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                String city = cityController.text.trim();
+                if (city.isNotEmpty) {
+                  fetchWeatherData(city);
+                }
+              },
+              child: const Text('Get Weather'),
+            ),
+            const SizedBox(height: 20),
+            isLoading
+                ? const CircularProgressIndicator()
+                : Column(
+                    children: [
+                      Text(
+                        'Temperature: $temperature',
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Description: $description',
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                    ],
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
